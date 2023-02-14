@@ -2,6 +2,8 @@ services:
   nostream:
     volumes:
       - ${PWD}/.nostr.local:/home/node
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   caddy:
     image: caddy:2.6.2-alpine
     container_name: caddy

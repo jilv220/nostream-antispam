@@ -52,6 +52,8 @@ services:
     restart: on-failure
     networks:
       default:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   nostream-db:
     image: postgres
     container_name: nostream-db

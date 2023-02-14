@@ -242,39 +242,39 @@ describe('EventMessageHandler', () => {
 
     describe('createdAt', () => {
       describe('maxPositiveDelta', () => {
-        it('returns undefined if maxPositiveDelta is zero', () => {
+        it('returns undefined if maxPositiveDelta is zero', async () => {
           eventLimits.createdAt.maxPositiveDelta = 0
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if createdDate is too far in the future', () => {
+        it('returns reason if createdDate is too far in the future', async () => {
           eventLimits.createdAt.maxPositiveDelta = 100
           event.created_at += 101
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('rejected: created_at is more than 100 seconds in the future')
         })
       })
 
       describe('maxNegativeDelta', () => {
-        it('returns undefined if maxNegativeDelta is zero', () => {
+        it('returns undefined if maxNegativeDelta is zero', async () => {
           eventLimits.createdAt.maxNegativeDelta = 0
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if createdDate is too far in the past', () => {
+        it('returns reason if createdDate is too far in the past', async () => {
           eventLimits.createdAt.maxNegativeDelta = 100
           event.created_at -= 101
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('rejected: created_at is more than 100 seconds in the past')
         })
       })
@@ -282,139 +282,139 @@ describe('EventMessageHandler', () => {
 
     describe('content', () => {
       describe('maxLength', () => {
-        it('returns undefined if maxLength is disabled', () => {
+        it('returns undefined if maxLength is disabled', async () => {
           eventLimits.content = [{ maxLength: 0 }]
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefned if content is not too long', () => {
+        it('returns undefned if content is not too long', async () => {
           eventLimits.content = [{ maxLength: 1 }]
           event.content = 'x'.repeat(1)
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if kind does not match', () => {
+        it('returns undefined if kind does not match', async () => {
           eventLimits.content = [{ kinds: [EventKinds.SET_METADATA], maxLength: 1 }]
           event.content = 'x'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if kind matches but content is short', () => {
+        it('returns undefined if kind matches but content is short', async () => {
           eventLimits.content = [{ kinds: [EventKinds.TEXT_NOTE], maxLength: 1 }]
           event.content = 'x'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if kind matches but content is too long', () => {
+        it('returns reason if kind matches but content is too long', async () => {
           eventLimits.content = [{ kinds: [EventKinds.TEXT_NOTE], maxLength: 1 }]
           event.content = 'xx'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('rejected: content is longer than 1 bytes')
         })
 
-        it('returns reason if content is too long', () => {
+        it('returns reason if content is too long', async () => {
           eventLimits.content = [{ maxLength: 1 }]
           event.content = 'x'.repeat(2)
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('rejected: content is longer than 1 bytes')
         })
       })
 
       describe('maxLength (deprecated)', () => {
-        it('returns undefined if maxLength is zero', () => {
+        it('returns undefined if maxLength is zero', async () => {
           eventLimits.content = { maxLength: 0 }
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if content is short', () => {
+        it('returns undefined if content is short', async () => {
           eventLimits.content = { maxLength: 100 }
           event.content = 'x'.repeat(100)
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if content is too long', () => {
+        it('returns reason if content is too long', async () => {
           eventLimits.content = { maxLength: 1 }
           event.content = 'xx'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('rejected: content is longer than 1 bytes')
         })
 
-        it('returns undefined if kind matches and content is short', () => {
+        it('returns undefined if kind matches and content is short', async () => {
           eventLimits.content = { kinds: [EventKinds.TEXT_NOTE], maxLength: 1 }
           event.content = 'x'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if kind does not match and content is too long', () => {
+        it('returns undefined if kind does not match and content is too long', async () => {
           eventLimits.content = { kinds: [EventKinds.SET_METADATA], maxLength: 1 }
           event.content = 'xx'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if content is too long', () => {
+        it('returns reason if content is too long', async () => {
           eventLimits.content = { maxLength: 1 }
           event.content = 'xx'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('rejected: content is longer than 1 bytes')
         })
 
-        it('returns undefined if content is not set', () => {
+        it('returns undefined if content is not set', async () => {
           eventLimits.content = undefined
           event.content = 'xx'
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
       })
 
       describe('maxNegativeDelta', () => {
-        it('returns undefined if maxNegativeDelta is zero', () => {
+        it('returns undefined if maxNegativeDelta is zero', async () => {
           eventLimits.createdAt.maxNegativeDelta = 0
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if createdDate is too far in the past', () => {
+        it('returns reason if createdDate is too far in the past', async () => {
           eventLimits.createdAt.maxNegativeDelta = 100
           event.created_at -= 101
 
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('rejected: created_at is more than 100 seconds in the past')
         })
       })
@@ -422,25 +422,25 @@ describe('EventMessageHandler', () => {
 
     describe('eventId', () => {
       describe('minLeadingZeroBits', () => {
-        it('returns undefined if minLeadingZeroBits is zero', () => {
+        it('returns undefined if minLeadingZeroBits is zero', async () => {
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if eventId has sufficient proof of work ', () => {
+        it('returns undefined if eventId has sufficient proof of work ', async () => {
           eventLimits.eventId.minLeadingZeroBits = 15
           event.id = '0001' + 'f'.repeat(60)
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if eventId has insufficient proof of work ', () => {
+        it('returns reason if eventId has insufficient proof of work ', async () => {
           eventLimits.eventId.minLeadingZeroBits = 16
           event.id = '00' + 'f'.repeat(62)
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('pow: difficulty 8<16')
         })
       })
@@ -448,107 +448,107 @@ describe('EventMessageHandler', () => {
 
     describe('pubkey', () => {
       describe('minLeadingZeroBits', () => {
-        it('returns undefined if minLeadingZeroBits is zero', () => {
+        it('returns undefined if minLeadingZeroBits is zero', async () => {
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if pubkey has sufficient proof of work ', () => {
+        it('returns undefined if pubkey has sufficient proof of work ', async () => {
           eventLimits.pubkey.minLeadingZeroBits = 17
           event.pubkey = '00007' + 'f'.repeat(59)
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if pubkey has insufficient proof of work ', () => {
+        it('returns reason if pubkey has insufficient proof of work ', async () => {
           eventLimits.pubkey.minLeadingZeroBits = 16
           event.pubkey = '0'.repeat(2) + 'f'.repeat(62)
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('pow: pubkey difficulty 8<16')
         })
       })
 
       describe('blacklist', () => {
-        it('returns undefined if blacklist is empty', () => {
+        it('returns undefined if blacklist is empty', async () => {
           eventLimits.pubkey.blacklist = []
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if pubkey is not blacklisted', () => {
+        it('returns undefined if pubkey is not blacklisted', async () => {
           eventLimits.pubkey.blacklist = ['aabbcc']
           event.pubkey = 'fffff'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if pubkey is not blacklisted by prefix', () => {
+        it('returns undefined if pubkey is not blacklisted by prefix', async () => {
           eventLimits.pubkey.blacklist = ['aa55']
           event.pubkey = 'aabbcc'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if pubkey is blacklisted', () => {
+        it('returns reason if pubkey is blacklisted', async () => {
           eventLimits.pubkey.blacklist = ['aabbcc']
           event.pubkey = 'aabbcc'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: pubkey not allowed')
         })
 
-        it('returns reason if pubkey is blacklisted by prefix', () => {
+        it('returns reason if pubkey is blacklisted by prefix', async () => {
           eventLimits.pubkey.blacklist = ['aa55']
           event.pubkey = 'aa55ccddeeff'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: pubkey not allowed')
         })
       })
 
       describe('whitelist', () => {
-        it('returns undefined if whitelist is empty', () => {
+        it('returns undefined if whitelist is empty', async () => {
           eventLimits.pubkey.whitelist = []
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if pubkey is whitelisted', () => {
+        it('returns undefined if pubkey is whitelisted', async () => {
           eventLimits.pubkey.whitelist = ['aabbcc']
           event.pubkey = 'aabbcc'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if pubkey is whitelisted by prefix', () => {
+        it('returns undefined if pubkey is whitelisted by prefix', async () => {
           eventLimits.pubkey.whitelist = ['aa55']
           event.pubkey = 'aa55ccddeeff'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if pubkey is not whitelisted', () => {
+        it('returns reason if pubkey is not whitelisted', async () => {
           eventLimits.pubkey.whitelist = ['ffffff']
           event.pubkey = 'aabbcc'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: pubkey not allowed')
         })
 
-        it('returns reason if pubkey is not whitelisted by prefix', () => {
+        it('returns reason if pubkey is not whitelisted by prefix', async () => {
           eventLimits.pubkey.whitelist = ['aa55']
           event.pubkey = 'aabbccddeeff'
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: pubkey not allowed')
         })
       })
@@ -556,93 +556,93 @@ describe('EventMessageHandler', () => {
 
     describe('kind', () => {
       describe('blacklist', () => {
-        it('returns undefined if blacklist is empty', () => {
+        it('returns undefined if blacklist is empty', async () => {
           eventLimits.kind.blacklist = []
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if kind is not blacklisted', () => {
+        it('returns undefined if kind is not blacklisted', async () => {
           eventLimits.kind.blacklist = [5]
           event.kind = 4
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if kind is not blacklisted in range', () => {
+        it('returns undefined if kind is not blacklisted in range', async () => {
           eventLimits.kind.blacklist = [[1, 5]]
           event.kind = 6
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if kind is blacklisted in range', () => {
+        it('returns reason if kind is blacklisted in range', async () => {
           eventLimits.kind.blacklist = [[1, 5]]
           event.kind = 4
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: event kind 4 not allowed')
         })
       })
 
       describe('whitelist', () => {
-        it('returns undefined if whitelist is empty', () => {
+        it('returns undefined if whitelist is empty', async () => {
           eventLimits.kind.whitelist = []
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if kind is whitelisted', () => {
+        it('returns undefined if kind is whitelisted', async () => {
           eventLimits.kind.whitelist = [5]
           event.kind = 5
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns undefined if kind is whitelisted in range', () => {
+        it('returns undefined if kind is whitelisted in range', async () => {
           eventLimits.kind.whitelist = [[1, 5]]
           event.kind = 3
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.be.undefined
         })
 
-        it('returns reason if kind is blacklisted and whitelisted in range', () => {
+        it('returns reason if kind is blacklisted and whitelisted in range', async () => {
           eventLimits.kind.blacklist = [3]
           eventLimits.kind.whitelist = [[1, 5]]
           event.kind = 3
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: event kind 3 not allowed')
         })
 
-        it('returns reason if kind is blacklisted and whitelisted', () => {
+        it('returns reason if kind is blacklisted and whitelisted', async () => {
           eventLimits.kind.blacklist = [3]
           eventLimits.kind.whitelist = [3]
           event.kind = 3
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: event kind 3 not allowed')
         })
 
-        it('returns reason if kind is not whitelisted', () => {
+        it('returns reason if kind is not whitelisted', async () => {
           eventLimits.kind.whitelist = [5]
           event.kind = 4
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: event kind 4 not allowed')
         })
 
-        it('returns reason if kind is not whitelisted in range', () => {
+        it('returns reason if kind is not whitelisted in range', async () => {
           eventLimits.kind.whitelist = [[1, 5]]
           event.kind = 6
           expect(
-            (handler as any).canAcceptEvent(event)
+            await (handler as any).canAcceptEvent(event)
           ).to.equal('blocked: event kind 6 not allowed')
         })
       })

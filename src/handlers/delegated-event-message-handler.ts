@@ -27,7 +27,7 @@ export class DelegatedEventMessageHandler extends EventMessageHandler implements
       return
     }
 
-    reason = this.canAcceptEvent(event)
+    reason = await this.canAcceptEvent(event)
     if (reason) {
       debug('event %s rejected: %s', event.id, reason)
       this.webSocket.emit(WebSocketAdapterEvent.Message, createCommandResult(event.id, false, reason))

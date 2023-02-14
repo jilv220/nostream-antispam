@@ -1,6 +1,6 @@
 import { Event, ExpiringEvent  } from '../@types/event'
 import { EventRateLimit, FeeSchedule, Settings } from '../@types/settings'
-import { getEventExpiration, getEventProofOfWork, getPubkeyProofOfWork, isEventIdValid, isEventKindOrRangeMatch, isEventSignatureValid, isExpiredEvent } from '../utils/event'
+import { getEventExpiration, getEventProofOfWork, getPubkeyProofOfWork, isEventIdValid, isEventKindOrRangeMatch, isEventSignatureValid, isEventSpam, isExpiredEvent } from '../utils/event'
 import { IEventStrategy, IMessageHandler } from '../@types/message-handlers'
 import { ContextMetadataKey } from '../constants/base'
 import { createCommandResult } from '../utils/messages'
@@ -50,7 +50,7 @@ export class EventMessageHandler implements IMessageHandler {
       return
     }
 
-    reason = this.canAcceptEvent(event)
+    reason = await this.canAcceptEvent(event)
     if (reason) {
       debug('event %s rejected: %s', event.id, reason)
       this.webSocket.emit(WebSocketAdapterEvent.Message, createCommandResult(event.id, false, reason))
@@ -79,7 +79,7 @@ export class EventMessageHandler implements IMessageHandler {
     }
   }
 
-  protected canAcceptEvent(event: Event): string | undefined {
+  protected async canAcceptEvent(event: Event): Promise<string | undefined> {
     const now = Math.floor(Date.now()/1000)
 
     const limits = this.settings().limits?.event ?? {}
@@ -172,6 +172,10 @@ export class EventMessageHandler implements IMessageHandler {
       && limits.kind.blacklist.length > 0
       && limits.kind.blacklist.some(isEventKindOrRangeMatch(event))) {
       return `blocked: event kind ${event.kind} not allowed`
+    }
+
+    if (await isEventSpam(event)) {
+      return `blocked: event is probably a spam`
     }
   }
 

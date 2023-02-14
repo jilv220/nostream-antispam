@@ -1,5 +1,5 @@
 import * as secp256k1 from '@noble/secp256k1'
-
+import axios  from 'axios'
 import { applySpec, converge, curry, mergeLeft, nth, omit, pipe, prop, reduceBy } from 'ramda'
 import { CanonicalEvent, DBEvent, Event, UnidentifiedEvent, UnsignedEvent } from '../@types/event'
 import { createCipheriv, getRandomValues } from 'crypto'
@@ -114,6 +114,27 @@ export const isEventMatchingFilter = (filter: SubscriptionFilter) => (event: Eve
   }
 
   return true
+}
+
+export const isEventSpam = async (event: Event): Promise<boolean> => {
+  let postRes = await axios({
+    method: 'post',
+    url: 'http://host.docker.internal:5000/test',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: event
+  })
+  .then(response => {
+    const label = response.data?.label
+    return label === 'spam' ? true : false
+  })
+  .catch(error => {
+    console.error(error);
+    return false
+  })
+  
+  return postRes
 }
 
 export const isDelegatedEvent = (event: Event): boolean => {
