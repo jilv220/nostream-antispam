@@ -49,11 +49,11 @@ services:
         condition: service_healthy
       nostream-migrate:
         condition: service_completed_successfully
+      nostream-antispam:
+        condition: service_started
     restart: on-failure
     networks:
       default:
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
   nostream-db:
     image: postgres
     container_name: nostream-db
@@ -111,6 +111,12 @@ services:
     networks:
       default:
         ipv4_address: 10.10.10.254
+  nostream-antispam:
+    image: sashimisub/nostr-spam-detection
+    container_name: nostream-antispam
+    restart: always
+    ports:
+      - 5000:5000
 
 networks:
   default:

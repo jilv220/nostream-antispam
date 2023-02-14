@@ -119,7 +119,7 @@ export const isEventMatchingFilter = (filter: SubscriptionFilter) => (event: Eve
 export const isEventSpam = async (event: Event): Promise<boolean> => {
   let postRes = await axios({
     method: 'post',
-    url: 'http://host.docker.internal:5000/test',
+    url: 'http://nostream-antispam:5000/test',
     headers: {
       'Content-Type': 'application/json'
     },
