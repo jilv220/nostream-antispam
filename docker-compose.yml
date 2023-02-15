@@ -116,7 +116,7 @@ services:
     container_name: nostream-antispam
     restart: always
     ports:
-      - 5000:5000
+      - 5001:5001
 
 networks:
   default:
