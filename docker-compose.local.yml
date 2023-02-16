@@ -1,5 +1,7 @@
 services:
   nostream:
+    environment:
+      DEBUG: "*"
     volumes:
       - ${PWD}/.nostr.local:/home/node
   caddy:
