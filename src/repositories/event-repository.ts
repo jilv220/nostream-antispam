@@ -30,7 +30,7 @@ import {
 } from 'ramda'
 
 import { ContextMetadataKey, EventDeduplicationMetadataKey, EventDelegatorMetadataKey, EventExpirationTimeMetadataKey } from '../constants/base'
-import { DatabaseClient, EventId } from '../@types/base'
+import { DatabaseClient, EventId, Pubkey } from '../@types/base'
 import { DBEvent, Event } from '../@types/event'
 import { IEventRepository, IQueryResult } from '../@types/repositories'
 import { toBuffer, toJSON } from '../utils/transform'
@@ -160,6 +160,34 @@ export class EventRepository implements IEventRepository {
     }
 
     return query
+  }
+
+  public getContentByPubkeys(pubkeys: Pubkey[], limit: undefined) : Promise<DBEvent> {
+    debug('querying for %s', pubkeys)
+    const events = this.readReplicaDbClient<DBEvent>('events')
+    events
+      .select('event_kind', 'event_content', 'event_created_at')
+      .whereIn('event_pubkey', pubkeys.map(pk => toBuffer(pk)))
+      .orderBy('event_created_at', 'desc')
+
+    if (typeof limit !== 'undefined') {
+      events
+        .limit(limit)
+    }
+
+    let res : Promise<DBEvent> = events.then(
+      (event) => {
+        let res = []
+        res = [...res, event]
+        return res
+      },
+      (reason) => {
+        debug(`failed to get content from pubkeys, ${reason}`)
+        return undefined
+      }
+    )
+
+    return res
   }
 
   public async create(event: Event): Promise<number> {

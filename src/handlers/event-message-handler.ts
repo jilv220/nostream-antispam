@@ -1,6 +1,6 @@
-import { Event, ExpiringEvent  } from '../@types/event'
+import { DBEvent, Event, ExpiringEvent  } from '../@types/event'
 import { EventRateLimit, FeeSchedule, Settings } from '../@types/settings'
-import { getEventExpiration, getEventProofOfWork, getPubkeyProofOfWork, isEventIdValid, isEventKindOrRangeMatch, isEventSignatureValid, isEventSpam, isExpiredEvent } from '../utils/event'
+import { getEventExpiration, getEventProofOfWork, getPubkeyProofOfWork, isEventIdValid, isEventKindOrRangeMatch, isEventSignatureValid, isEventSpam, isExpiredEvent, toNostrEvent } from '../utils/event'
 import { IEventStrategy, IMessageHandler } from '../@types/message-handlers'
 import { ContextMetadataKey } from '../constants/base'
 import { createCommandResult } from '../utils/messages'
@@ -9,7 +9,7 @@ import { EventExpirationTimeMetadataKey } from '../constants/base'
 import { Factory } from '../@types/base'
 import { IncomingEventMessage } from '../@types/messages'
 import { IRateLimiter } from '../@types/utils'
-import { IUserRepository } from '../@types/repositories'
+import { IUserRepository, IEventRepository } from '../@types/repositories'
 import { IWebSocketAdapter } from '../@types/adapters'
 import { WebSocketAdapterEvent } from '../constants/adapter'
 
@@ -20,6 +20,7 @@ export class EventMessageHandler implements IMessageHandler {
     protected readonly webSocket: IWebSocketAdapter,
     protected readonly strategyFactory: Factory<IEventStrategy<Event, Promise<void>>, [Event, IWebSocketAdapter]>,
     protected readonly userRepository: IUserRepository,
+    protected readonly eventRepository: IEventRepository,
     private readonly settings: () => Settings,
     private readonly slidingWindowRateLimiter: Factory<IRateLimiter>,
   ) {}
@@ -174,7 +175,9 @@ export class EventMessageHandler implements IMessageHandler {
       return `blocked: event kind ${event.kind} not allowed`
     }
 
-    if (await isEventSpam(event)) {
+    const lastTwo = await this.eventRepository.getContentByPubkeys([event.pubkey], 2)
+
+    if (await isEventSpam(event, lastTwo[0] as any)) {
       return `blocked: event is probably a spam`
     }
   }

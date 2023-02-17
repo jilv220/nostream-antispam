@@ -15,6 +15,7 @@ import { isGenericTagQuery } from './filter'
 import { RuneLike } from './runes/rune-like'
 import { SubscriptionFilter } from '../@types/subscription'
 import { WebSocketServerAdapterEvent } from '../constants/adapter'
+import { debug } from 'console'
 
 export const serializeEvent = (event: UnidentifiedEvent): CanonicalEvent => [
   0,
@@ -116,7 +117,7 @@ export const isEventMatchingFilter = (filter: SubscriptionFilter) => (event: Eve
   return true
 }
 
-export const isEventSpam = async (event: Event): Promise<boolean> => {
+export const isEventSpam = async (event: Event, lastTwo: any): Promise<boolean> => {
   let postRes = await axios({
     method: 'post',
     url: 'http://nostream-antispam:5001/test',
@@ -133,8 +134,29 @@ export const isEventSpam = async (event: Event): Promise<boolean> => {
     console.error(error);
     return false
   })
+
+  // If ml model thinks it is spam
+  if (postRes) { return true }
+
+  const hasNonKind1 = lastTwo.some((event) => event.event_kind !== 1)
+  const onlyKind1 = !hasNonKind1
+  const contents = lastTwo.map((event) => {
+    return event.event_content
+  })
+
+  const checkEqual = <T>(arr: T[]) => {
+    const setItem = new Set(arr);
+    return setItem.size <= 1;
+  }
+
+  // if last 3 only kind1 and they all have the same content
+  if (onlyKind1 
+    && checkEqual(contents)
+    && (event.content === contents[1])) {
+    return true
+  }
   
-  return postRes
+  return false
 }
 
 export const isDelegatedEvent = (event: Event): boolean => {

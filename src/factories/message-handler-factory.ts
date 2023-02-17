@@ -23,6 +23,7 @@ export const messageHandlerFactory = (
             adapter,
             delegatedEventStrategyFactory(eventRepository),
             userRepository,
+            eventRepository,
             createSettings,
             slidingWindowRateLimiterFactory,
           )
@@ -32,6 +33,7 @@ export const messageHandlerFactory = (
           adapter,
           eventStrategyFactory(eventRepository),
           userRepository,
+          eventRepository,
           createSettings,
           slidingWindowRateLimiterFactory,
         )
