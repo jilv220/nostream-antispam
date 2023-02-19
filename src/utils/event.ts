@@ -138,8 +138,11 @@ export const isEventSpam = async (event: Event, lastTwo: any): Promise<boolean> 
   // If ml model thinks it is spam
   if (postRes) { return true }
 
-  const spamKinds = [1, 42]
-  const hasSpamKinds = lastTwo.some((event) => spamKinds.includes(event.event_id) )
+  const noSpamKinds = lastTwo.some((event) => {
+    return !(event.event_kind === 1 || event.event_kind === 42)
+  })
+  const hasOnlySpamKinds = !noSpamKinds
+
   const contents = lastTwo.map((event) => {
     return event.event_content
   })
@@ -150,7 +153,7 @@ export const isEventSpam = async (event: Event, lastTwo: any): Promise<boolean> 
   }
 
   // if last 3 only kind1 and they all have the same content
-  if (!hasSpamKinds
+  if ( hasOnlySpamKinds
     && checkEqual(contents)
     && (event.content === contents[1])) {
     return true

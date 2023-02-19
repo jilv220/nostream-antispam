@@ -117,6 +117,12 @@ services:
     restart: always
     ports:
       - 5001:5001
+  nostream-db-admin:
+    image: adminer
+    container_name: nostream-db-admin
+    restart: always
+    ports:
+      - 8080:8080
 
 networks:
   default:
