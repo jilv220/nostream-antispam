@@ -55,6 +55,7 @@ specifiers:
   sinon: 15.0.1
   sinon-chai: ^3.7.0
   source-map-support: ^0.5.21
+  string-similarity: ^4.0.4
   tor-control-ts: ^1.0.0
   ts-node: 10.9.1
   ts-node-dev: ^1.1.8
@@ -80,6 +81,7 @@ dependencies:
   ramda: 0.28.0
   redis: 4.5.1
   rxjs: 7.8.0
+  string-similarity: 4.0.4
   tor-control-ts: 1.0.0
   ws: 8.12.0
 
@@ -5698,6 +5700,10 @@ packages:
     resolution: {integrity: sha512-a1uQGz7IyVy9YwhqjZIZu1c8JO8dNIe20xBmSS6qu9kv++k3JGzCVmprbNN5Kn+BgzD5E7YYwg1CcjuJMRNsvg==}
     engines: {node: '>=0.6.19'}
     dev: true
+
+  /string-similarity/4.0.4:
+    resolution: {integrity: sha512-/q/8Q4Bl4ZKAPjj8WerIBJWALKkaPRfrvhfF8k/B23i4nzrlRj2/go1m90In7nG/3XDSbOo0+pu6RvCTM9RGMQ==}
+    dev: false
 
   /string-width/4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}

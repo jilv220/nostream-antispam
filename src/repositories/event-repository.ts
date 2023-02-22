@@ -166,7 +166,7 @@ export class EventRepository implements IEventRepository {
     debug('querying for %s', pubkeys)
     const events = this.readReplicaDbClient<DBEvent>('events')
     events
-      .select('event_kind', 'event_content', 'event_created_at')
+      .select('event_kind', 'event_content', 'event_created_at', 'event_tags')
       .whereIn('event_pubkey', pubkeys.map(pk => toBuffer(pk)))
       .orderBy('event_created_at', 'desc')
 

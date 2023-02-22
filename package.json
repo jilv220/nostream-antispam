@@ -131,6 +131,7 @@
     "ramda": "0.28.0",
     "redis": "4.5.1",
     "rxjs": "7.8.0",
+    "string-similarity": "^4.0.4",
     "tor-control-ts": "^1.0.0",
     "ws": "8.12.0"
   },

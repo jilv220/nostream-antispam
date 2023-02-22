@@ -16,6 +16,7 @@ import { RuneLike } from './runes/rune-like'
 import { SubscriptionFilter } from '../@types/subscription'
 import { WebSocketServerAdapterEvent } from '../constants/adapter'
 import { debug } from 'console'
+import { checkEqual, computeArrSimilarity } from './misc'
 
 export const serializeEvent = (event: UnidentifiedEvent): CanonicalEvent => [
   0,
@@ -135,31 +136,76 @@ export const isEventSpam = async (event: Event, lastTwo: any): Promise<boolean> 
     return false
   })
 
-  // If ml model thinks it is spam
+  // If the ML model thinks the event is spam
   if (postRes) { return true }
 
+  // TODO: refactor and testcase
+  const lastTwoTags = lastTwo.map((event) => event.event_tags).flat()
+
+  // Old nip-10 deprecated, should use -1 instead
+  const PTags = event.tags.filter((tag) => tag[0] === 'p')
+  const PK = PTags.map((tag) => tag.at(-1))
+  const lastTwoPTags = lastTwoTags.filter((tag) => tag[0] === 'p')
+  const lastTwoPKs = lastTwoPTags.map((tag) => tag.at(-1))
+  const lastThreePKs = [...PK, ...lastTwoPKs]
+
+  let lastTwoContents = lastTwo.map((event) => event.event_content)
+  if (lastTwoContents.length === 0) { lastTwoContents = ['',''] }
+  const lastThreeContents = [...lastTwoContents, event.content].map((s) => s.trim())
+
+  const ETags = event.tags.filter((tag) => tag[0] === 'e')
+  const lastTwoETags = lastTwo.map(event => {
+    const tags = event.event_tags;
+    const firstTag = tags[0] || ['',''];
+    const secondTag = tags[1] || ['',''];
+    return (firstTag.length === 3) ? secondTag : firstTag;
+  });
+
+  const replyTarget = ETags.at(-1) !== undefined ? ETags.at(-1)[1] : undefined
+  const lastTwoReplyTarget = lastTwoETags.map((tag) => tag.at(-1))
+  const lastThreeReplyTargets = [...lastTwoReplyTarget, replyTarget]
+
+  const THRESHOLD = 0.67
+  const simScore = computeArrSimilarity(lastThreeContents)
+
+  if ( isReplyEvent(event) 
+    && (simScore >= THRESHOLD)
+    && checkEqual(lastThreePKs)) {
+    debug(`should block: Harass the same person three times in a row`)
+    return true
+  }
+
+  if ( isReplyEvent(event) 
+    && (simScore >= THRESHOLD) 
+    && checkEqual(lastThreeReplyTargets)) {
+    debug(`should block: Harass the same event three times in a row`)
+    return true
+  }
+  
   const noSpamKinds = lastTwo.some((event) => {
     return !(event.event_kind === 1 || event.event_kind === 42)
   })
   const hasOnlySpamKinds = !noSpamKinds
 
-  const contents = lastTwo.map((event) => {
-    return event.event_content
-  })
-
-  const checkEqual = <T>(arr: T[]) => {
-    const setItem = new Set(arr);
-    return setItem.size <= 1;
-  }
-
-  // if last 3 only kind1 and they all have the same content
-  if ( hasOnlySpamKinds
-    && checkEqual(contents)
-    && (event.content === contents[1])) {
+  // Non reply events
+  if ( hasOnlySpamKinds 
+    && !isReplyEvent(event)
+    && (simScore >= THRESHOLD)) {
     return true
   }
   
   return false
+}
+
+export const isReplyEvent = (event: Event): boolean => {
+
+  const replyKinds = [1, 42]
+  const isReplyKind = replyKinds.includes(event.kind)
+  const notEmpty = event.tags.length !== 0
+  const hasE = event.tags.some((tag) => tag[0] === 'e')
+  const hasP = event.tags.some((tag) => tag[0] === 'p')
+
+  return notEmpty && isReplyKind && hasE && hasP
 }
 
 export const isDelegatedEvent = (event: Event): boolean => {

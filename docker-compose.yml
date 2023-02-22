@@ -53,6 +53,8 @@ services:
         condition: service_completed_successfully
       nostream-antispam:
         condition: service_started
+      nostream-db-admin:
+        condition: service_started
     restart: on-failure
     networks:
       default:
