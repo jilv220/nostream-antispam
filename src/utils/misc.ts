@@ -14,7 +14,6 @@ export const checkEqual = <T>(arr: T[]) => {
 export const computeArrSimilarity = (arr: string[]): number => {
   const scores = arr.map((e, i, arr) => {
     if (arr[i-1]) {
-      console.log('wtf')
       return stringSimilarity.compareTwoStrings(e, arr[i-1])
     }
   })
